@@ -1,0 +1,6 @@
+rdkit
+tqdm
+exmol
+pandas
+smallworld-api
+#git+https://github.com/lich-uct/syba.git
