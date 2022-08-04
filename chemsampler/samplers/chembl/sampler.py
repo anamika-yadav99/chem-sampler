@@ -6,20 +6,15 @@ from ratelimit import sleep_and_retry, limits
 from standardiser import standardise
 from rdkit import Chem
 
+
 @sleep_and_retry
 @limits(calls=2, period=30)
-def run_chembl_sampler(
-    origin_smiles: str,
-    similarity: float = 0.4,
-):
+def run_chembl_sampler(origin_smiles: str, similarity: float = 0.4):
     """Function adapted from Andrew White's Exmol"""
-    similarity = int(similarity*100)
+    similarity = int(similarity * 100)
     url = f"https://www.ebi.ac.uk/chembl/api/data/similarity/{origin_smiles}/{similarity}?format=json"
     try:
-        reply = requests.get(
-            url,
-            timeout=10,
-        )
+        reply = requests.get(url, timeout=10)
     except requests.exceptions.Timeout:
         print("ChEMBL seems to be down right now")
         return []
@@ -34,7 +29,6 @@ def run_chembl_sampler(
 
 
 class ChemblSampler(object):
-
     def __init__(self):
         self.inflation = 2
 
@@ -58,7 +52,7 @@ class ChemblSampler(object):
         for smi in tqdm(smiles_list):
             sampled_smiles += self._sample(smi)
             t1 = timer()
-            if (t1-t0) > time_budget_sec:
+            if (t1 - t0) > time_budget_sec:
                 break
             if len(set(sampled_smiles)) > n:
                 break

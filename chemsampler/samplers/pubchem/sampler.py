@@ -6,13 +6,10 @@ from ratelimit import sleep_and_retry, limits
 from standardiser import standardise
 from rdkit import Chem
 
+
 @sleep_and_retry
 @limits(calls=2, period=30)
-def run_chemed(
-    origin_smiles: str,
-    num_samples: int,
-    similarity: float = 0.4,
-):
+def run_chemed(origin_smiles: str, num_samples: int, similarity: float = 0.4):
     """Function adapted from Andrew White's Exmol"""
     url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/fastsimilarity_2d/smiles/{requests.utils.quote(origin_smiles)}/property/CanonicalSMILES/JSON"
     try:
@@ -36,7 +33,6 @@ def run_chemed(
 
 
 class PubChemSampler(object):
-
     def __init__(self):
         self.inflation = 2
 
@@ -55,14 +51,14 @@ class PubChemSampler(object):
         return std_smiles
 
     def sample(self, smiles_list, n, time_budget_sec=600):
-        n_individual = int(n/len(smiles_list))
-        n_individual = int(n_individual*self.inflation)
+        n_individual = int(n / len(smiles_list))
+        n_individual = int(n_individual * self.inflation)
         sampled_smiles = []
         t0 = timer()
         for smi in tqdm(smiles_list):
             sampled_smiles += self._sample(smi, n_individual)
             t1 = timer()
-            if (t1-t0) > time_budget_sec:
+            if (t1 - t0) > time_budget_sec:
                 break
             if len(set(sampled_smiles)) > n:
                 break

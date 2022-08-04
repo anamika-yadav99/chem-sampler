@@ -8,7 +8,6 @@ root = os.path.abspath(os.path.dirname(__file__))
 
 
 class Sascorer(object):
-
     def __init__(self):
         self.framework_dir = os.path.join(root, "framework")
 
@@ -26,9 +25,7 @@ class Sascorer(object):
         with open(run_file, "w") as f:
             lines = [
                 "bash {0}/run_predict.sh {0} {1} {2}".format(
-                    self.framework_dir,
-                    input_file,
-                    output_file
+                    self.framework_dir, input_file, output_file
                 )
             ]
             f.write(os.linesep.join(lines))

@@ -25,8 +25,9 @@ class StonedSingleSampler(object):
 
 
 class StonedSampler(object):
-
-    def __init__(self, min_similarity=0.6, max_similarity=0.9, inflation=2, time_budget_sec=60):
+    def __init__(
+        self, min_similarity=0.6, max_similarity=0.9, inflation=2, time_budget_sec=60
+    ):
         self.min_similarity = min_similarity
         self.max_similarity = max_similarity
         self.sampler = StonedSingleSampler(max_mutations=5, min_mutations=1)
@@ -38,10 +39,10 @@ class StonedSampler(object):
 
     def _sample(self, smiles_list, n):
         random.shuffle(smiles_list)
-        n_individual = int(np.clip(self.inflation*n/len(smiles_list), 100, 1000))
+        n_individual = int(np.clip(self.inflation * n / len(smiles_list), 100, 1000))
         available_time = int((self.time_budget_sec - self.elapsed_time)) + 1
         samples_per_sec = 100
-        estimated_time = len(smiles_list)/samples_per_sec
+        estimated_time = len(smiles_list) / samples_per_sec
         if estimated_time > available_time:
             n_individual = 10
         sampled_smiles = []
@@ -52,7 +53,7 @@ class StonedSampler(object):
             sampled_smiles += sampled[0]
             sampled_sim += sampled[1]
             t1 = time.time()
-            dt = t1-t0
+            dt = t1 - t0
             self.elapsed_time += dt
             if self.elapsed_time > self.time_budget_sec:
                 self.finished = True
@@ -62,17 +63,19 @@ class StonedSampler(object):
             if sim < self.min_similarity or sim > self.max_similarity:
                 continue
             smiles += [smi]
-        n = int(len(smiles)/self.inflation+1)
+        n = int(len(smiles) / self.inflation + 1)
         smiles = self._select_by_similarity(smiles)
         smiles = self._select_by_score(smiles, n)
         return set(smiles)
-    
+
     def _select_by_score(self, smiles, n):
         smiles = list(smiles)
         scores = self.scorer.score(smiles)
         df = pd.DataFrame({"smiles": smiles, "score": scores})
-        return list(df.sort_values(by="score").head(n)["smiles"]) # the smaller the better the synthetic accessibility score
-    
+        return list(
+            df.sort_values(by="score").head(n)["smiles"]
+        )  # the smaller the better the synthetic accessibility score
+
     def _select_by_similarity(self, smiles):
         sel_smiles = []
         for smi in tqdm(smiles):
@@ -84,10 +87,13 @@ class StonedSampler(object):
                 continue
             sel_smiles += [smi]
         return sel_smiles
-    
+
     def sample(self, smiles_list, n):
         self.seed_smiles = list(smiles_list)
-        self.seed_fps = [AllChem.GetMorganFingerprintAsBitVect(Chem.MolFromSmiles(smi), 2) for smi in self.seed_smiles]
+        self.seed_fps = [
+            AllChem.GetMorganFingerprintAsBitVect(Chem.MolFromSmiles(smi), 2)
+            for smi in self.seed_smiles
+        ]
         smiles = set(smiles_list)
         sampled_smiles = set()
         for i in range(n):

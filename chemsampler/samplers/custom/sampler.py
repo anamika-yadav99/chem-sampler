@@ -6,6 +6,7 @@ import random
 import time
 import numpy as np
 from tqdm import tqdm
+
 root = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(root, "..", "..", "tools", "fpsim2"))
 
@@ -18,8 +19,9 @@ from FPSim2 import FPSim2Engine
 
 
 class CustomLibrarySampler(object):
-
-    def __init__(self, min_similarity=0.6, max_similarity=0.9, time_budget_sec=60, n_workers=4):
+    def __init__(
+        self, min_similarity=0.6, max_similarity=0.9, time_budget_sec=60, n_workers=4
+    ):
         self.min_similarity = min_similarity
         self.max_similarity = max_similarity
         self.n_workers = n_workers
@@ -33,7 +35,7 @@ class CustomLibrarySampler(object):
         self.finished = False
 
     def get_db_filename(self):
-        return self.fp_filename[-3:]+".csv"
+        return self.fp_filename[-3:] + ".csv"
 
     def read_db_smiles(self):
         smiles_list = []
@@ -89,7 +91,7 @@ class CustomLibrarySampler(object):
             sampled_smiles += sampled[0]
             sampled_sim += sampled[1]
             t1 = time.time()
-            dt = t1-t0
+            dt = t1 - t0
             self.elapsed_time += dt
             if self.elapsed_time > self.time_budget_sec:
                 self.finished = True
@@ -104,7 +106,10 @@ class CustomLibrarySampler(object):
 
     def sample(self, smiles_list, n):
         self.seed_smiles = list(smiles_list)
-        self.seed_fps = [AllChem.GetMorganFingerprintAsBitVect(Chem.MolFromSmiles(smi), 2) for smi in self.seed_smiles]
+        self.seed_fps = [
+            AllChem.GetMorganFingerprintAsBitVect(Chem.MolFromSmiles(smi), 2)
+            for smi in self.seed_smiles
+        ]
         smiles = set(smiles_list)
         sampled_smiles = set()
         for i in range(n):
@@ -123,7 +128,7 @@ class CustomLibrarySampler(object):
         if os.path.exists(save_dir):
             shutil.rmtree(save_dir)
         new_fp_filename = os.path.join(save_dir, "fp.h5")
-        shutil.move(self.fp_filename, )
+        shutil.move(self.fp_filename)
         self.fp_filename = new_fp_filename
         new_db_smiles_filename = self.get_db_filename()
         shutil.move(self.db_smiles_filename, new_db_smiles_filename)

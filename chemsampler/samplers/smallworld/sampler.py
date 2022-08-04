@@ -7,6 +7,7 @@ import random
 import pandas as pd
 from smallworld_api import SmallWorld
 import warnings
+
 warnings.filterwarnings("ignore")
 
 
@@ -21,14 +22,14 @@ def get_maps():
     data = get_available_maps()
     labels = ["REAL", "WuXi", "MCule", "Zinc"]
     found_maps = collections.defaultdict(list)
-    for k,v in data.items():
+    for k, v in data.items():
         for l in labels:
             l_ = l.lower()
             k_ = k.lower()
             if l_ in k_:
                 found_maps[l] += [k]
     found_maps_ = {}
-    for k,v in found_maps.items():
+    for k, v in found_maps.items():
         if len(v) == 1:
             v_ = v[0]
             if data[v_]["enabled"] and data[v_]["status"] == "Available":
@@ -57,34 +58,37 @@ def get_maps():
 
 
 class SmallWorldSampler(object):
-    
     def __init__(self, dist=10, length=100):
         self.maps = get_maps()
         self.sw = SmallWorld()
         self.dist = dist
         self.length = length
         self.seconds_per_query = 3
-        
+
     def _sample(self, smiles, time_budget_sec):
         t0 = time.time()
         sampled_smiles = []
         for m in self.maps:
             try:
                 db_name = m[1]
-                results : pd.DataFrame = self.sw.search(smiles, dist=self.dist, db=db_name, length=self.length)
+                results: pd.DataFrame = self.sw.search(
+                    smiles, dist=self.dist, db=db_name, length=self.length
+                )
             except:
                 print(smiles, m, "did not work...")
                 results = None
             if results is not None:
                 sampled_smiles += list(results["smiles"])
             t1 = time.time()
-            if (t1-t0) > time_budget_sec:
+            if (t1 - t0) > time_budget_sec:
                 break
             t0 = time.time()
         return sampled_smiles
-            
+
     def sample(self, smiles_list, time_budget_sec=600):
-        time_budget_sec_per_query = int(time_budget_sec/(self.seconds_per_query*len(smiles_list)))+1
+        time_budget_sec_per_query = (
+            int(time_budget_sec / (self.seconds_per_query * len(smiles_list))) + 1
+        )
         sampled_smiles = []
         for smi in tqdm(smiles_list):
             sampled_smiles += self._sample(smi, time_budget_sec_per_query)
