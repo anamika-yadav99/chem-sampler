@@ -17,7 +17,7 @@ from FPSim2.io import create_db_file
 from FPSim2 import FPSim2Engine
 
 
-class LibrarySampler(object):
+class CustomLibrarySampler(object):
 
     def __init__(self, min_similarity=0.6, max_similarity=0.9, time_budget_sec=60, n_workers=4):
         self.min_similarity = min_similarity
