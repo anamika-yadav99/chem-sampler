@@ -60,7 +60,7 @@ class ChemSampler(object):
             sampler = Sampler()
             return sampler.sample(
                 smiles_list=smiles_list,
-                n=self.num_samples
+                n=max(self.num_samples,100) # TODO check
             )
 
     def _greedy_sample(self, smiles_list, num_samples, time_budget_sec):
