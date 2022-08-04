@@ -25,15 +25,12 @@ class StonedSingleSampler(object):
 
 
 class StonedSampler(object):
-    def __init__(
-        self, min_similarity=0.6, max_similarity=0.9, inflation=2, time_budget_sec=60
-    ):
+    def __init__(self, min_similarity=0.6, max_similarity=0.9, inflation=2):
         self.min_similarity = min_similarity
         self.max_similarity = max_similarity
         self.sampler = StonedSingleSampler(max_mutations=5, min_mutations=1)
         self.scorer = Sascorer()
         self.inflation = inflation
-        self.time_budget_sec = time_budget_sec
         self.elapsed_time = 0
         self.finished = False
 
@@ -88,7 +85,8 @@ class StonedSampler(object):
             sel_smiles += [smi]
         return sel_smiles
 
-    def sample(self, smiles_list, n):
+    def sample(self, smiles_list, n, time_budget_sec=60):
+        self.time_budget_sec = time_budget_sec
         self.seed_smiles = list(smiles_list)
         self.seed_fps = [
             AllChem.GetMorganFingerprintAsBitVect(Chem.MolFromSmiles(smi), 2)
