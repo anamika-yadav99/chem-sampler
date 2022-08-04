@@ -11,7 +11,7 @@ from rdkit import Chem
 def run_chemed(
     origin_smiles: str,
     num_samples: int,
-    similarity: float = 0.1,
+    similarity: float = 0.4,
 ):
     """Function adapted from Andrew White's Exmol"""
     url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/fastsimilarity_2d/smiles/{requests.utils.quote(origin_smiles)}/property/CanonicalSMILES/JSON"

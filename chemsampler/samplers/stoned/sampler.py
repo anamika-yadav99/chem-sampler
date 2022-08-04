@@ -7,10 +7,10 @@ from rdkit import DataStructs
 from rdkit.Chem import AllChem
 from rdkit import Chem
 from exmol import run_stoned
-from syba.syba import SybaClassifier
+from ...tools.sascore.sascorer import Sascorer
 
 
-class StonedSampler(object):
+class StonedSingleSampler(object):
     def __init__(self, max_mutations=2, min_mutations=1):
         self.max_mutations = max_mutations
         self.min_mutations = min_mutations
@@ -24,17 +24,13 @@ class StonedSampler(object):
         )
 
 
-class StonedBatchSampler(object):
+class StonedSampler(object):
 
-    def __init__(self, min_similarity=0.6, max_similarity=0.9, scorer=None, inflation=2, time_budget_sec=60):
+    def __init__(self, min_similarity=0.6, max_similarity=0.9, inflation=2, time_budget_sec=60):
         self.min_similarity = min_similarity
         self.max_similarity = max_similarity
-        self.sampler = StonedSampler(max_mutations=5, min_mutations=1)
-        if scorer is None:
-            self.scorer = SybaClassifier()
-            self.scorer.fitDefaultScore()
-        else:
-            self.scorer = scorer
+        self.sampler = StonedSingleSampler(max_mutations=5, min_mutations=1)
+        self.scorer = Sascorer()
         self.inflation = inflation
         self.time_budget_sec = time_budget_sec
         self.elapsed_time = 0
@@ -73,9 +69,9 @@ class StonedBatchSampler(object):
     
     def _select_by_score(self, smiles, n):
         smiles = list(smiles)
-        scores = [self.scorer.predict(smi) for smi in tqdm(smiles)]
+        scores = self.scorer.score(smiles)
         df = pd.DataFrame({"smiles": smiles, "score": scores})
-        return list(df.sort_values(by="score").tail(n)["smiles"])
+        return list(df.sort_values(by="score").head(n)["smiles"]) # the smaller the better the synthetic accessibility score
     
     def _select_by_similarity(self, smiles):
         sel_smiles = []
