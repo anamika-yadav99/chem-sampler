@@ -1,5 +1,7 @@
 import os
 import csv
+from .sampler import ChemSampler
+
 
 root = os.path.abspath(os.path.dirname(__file__))
 

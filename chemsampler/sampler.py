@@ -1,6 +1,5 @@
 import random
 from timeit import default_timer as timer
-import networkx as nx
 import numpy as np
 from tqdm import tqdm
 
@@ -13,6 +12,7 @@ from .samplers.pubchem.sampler import PubChemSampler
 from .samplers.smallworld.sampler import SmallWorldSampler
 from .samplers.stoned.sampler import StonedSampler
 from .samplers.mollib.sampler import MollibSampler
+from .samplers.fasmifra.sampler import FasmifraSampler
 
 
 SAMPLERS_LIST = [
@@ -33,6 +33,7 @@ class ChemSampler(object):
         self.inflation = inflation
         self.max_greedy_iterations = max_greedy_iterations
         self.small_list_size = 10
+        self.sampled_smiles = None
 
     def _one_sampler(self, smiles_list):
         random.shuffle(smiles_list)
@@ -77,6 +78,10 @@ class ChemSampler(object):
                 smiles_list=small_smiles_list,
                 n=max(self.num_samples, 100),  # TODO check
             )
+        if Sampler == FasmifraSampler:
+            print("FasmifraSampler")
+            sampler = Sampler()
+            return sampler.sample(smiles_list=small_smiles_list, n=self.num_samples)
 
     def _greedy_sample(self, smiles_list, num_samples, time_budget_sec):
         t0 = timer()
@@ -104,7 +109,7 @@ class ChemSampler(object):
         else:
             self.sampled_smiles.update(sampled_smiles)
 
-    def prioritize_smiles(
+    def subsample(
         self,
         smiles_list,
         sampled_smiles,
@@ -115,6 +120,7 @@ class ChemSampler(object):
     ):
         steps = 100
         offset = 0.1
+        num_atoms_proportion_difference = 0.5
         assert sim_ub > sim_lb
         if distribution == "normal":
             mean = (sim_ub + sim_lb) / 2
@@ -143,15 +149,21 @@ class ChemSampler(object):
             for smi in sampled_smiles
         ]
         R = []
-        for input_fp in tqdm(input_fps):
+        for input_idx, input_fp in tqdm(enumerate(input_fps)):
             sims = DataStructs.BulkTanimotoSimilarity(input_fp, sampled_fps)
+            input_num_atoms = Chem.MolFromSmiles(smiles_list[input_idx]).GetNumAtoms()
             selected_idxs = set()
             for _ in range(num_per_sample):
                 ref_sim = np.random.choice(values, size=None, p=weights)
                 distance = np.abs(sims - ref_sim)
                 idx = np.argmin(distance)
                 if distance[idx] < offset:
-                    selected_idxs.update([idx])
+                    sampled_num_atoms = Chem.MolFromSmiles(sampled_smiles[idx]).GetNumAtoms()
+                    if (
+                        (abs(sampled_num_atoms - input_num_atoms) / input_num_atoms)
+                        < num_atoms_proportion_difference
+                    ):
+                        selected_idxs.update([idx])
             if len(selected_idxs) != 0:
                 selected_idxs = sorted(selected_idxs)
                 selected_sims = DataStructs.BulkTanimotoSimilarity(
@@ -173,7 +185,9 @@ class ChemSampler(object):
         sim_lb=0.4,
         distribution="ramp",
         time_budget_sec=60,
+        flatten=False,
     ):
+        num_per_sample = max(3, int(num_samples / len(smiles_list)))
         if self.sampled_smiles is None:
             self.more(
                 smiles_list=smiles_list,
@@ -184,16 +198,18 @@ class ChemSampler(object):
         self.one_sampler_time_budget_sec = (
             int(self.time_budget_sec / len(self.samplers_list)) + 1
         )
-        self.num_samples = num_samples
-        sampled_smiles = self._greedy_sample(smiles_list, num_samples, time_budget_sec)
-        sampled_smiles = list(sampled_smiles)
-        random.shuffle(sampled_smiles)
-        self.prioritize_smiles(
-            self,
+        R = self.subsample(
             smiles_list=smiles_list,
-            sampled_smiles=sampled_smiles,
+            sampled_smiles=list(self.sampled_smiles),
             sim_ub=sim_ub,
             sim_lb=sim_lb,
             distribution=distribution,
             num_per_sample=num_per_sample,
         )
+        data = R
+        if flatten:
+            flat_data = list(set([x for d in data for x in d]))
+            random.shuffle(flat_data)
+            return flat_data
+        else:
+            return data

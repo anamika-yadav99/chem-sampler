@@ -1,12 +1,13 @@
 # ChemSampler
 Sample small molecules, both from large chemical libraries as well as generative models
 
-## Installation
+## Usage
 
-```bash
-conda create -n chemsampler python=3.7
-conda activate chemsampler
-git clone https://github.com/ersilia-os/chem-sampler.git
-cd chem-sampler
-python -m pip install -e .
+```python
+from chemsampler import ChemSampler
+from chemsampler import example
+
+smiles_list = example()
+sampler = ChemSampler()
+sampled_smiles = sampler.sample(smiles_list, num_samples=1000, sim_ub=0.95, sim_lb=0.6, distribution="ramp")
 ```
