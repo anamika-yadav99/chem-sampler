@@ -13,6 +13,9 @@ from .samplers.smallworld.sampler import SmallWorldSampler
 from .samplers.stoned.sampler import StonedSampler
 from .samplers.mollib.sampler import MollibSampler
 from .samplers.fasmifra.sampler import FasmifraSampler
+from .samplers.moler.sampler import moler_sampler
+from .samplers.bimodal.sampler import bimodal_sampler
+
 
 
 SAMPLERS_LIST = [
@@ -21,6 +24,8 @@ SAMPLERS_LIST = [
     SmallWorldSampler,
     StonedSampler,
     MollibSampler,
+    bimodal_sampler,
+    moler_sampler
 ]
 
 
@@ -39,6 +44,9 @@ class ChemSampler(object):
         random.shuffle(smiles_list)
         small_smiles_list = smiles_list[: self.small_list_size]
         Sampler = random.sample(self.samplers_list, 1)[0]
+        
+        # sampler= ["chemsampler.tools.moler.sampler.moler_sampler"]
+        # Sampler =sampler[0]
         print(Sampler)
         if Sampler == ChemblSampler:
             print("ChemblSampler")
@@ -82,6 +90,18 @@ class ChemSampler(object):
             print("FasmifraSampler")
             sampler = Sampler()
             return sampler.sample(smiles_list=small_smiles_list, n=self.num_samples)
+        if Sampler == moler_sampler:
+            print("moler_sampler")
+            sampler = Sampler()
+            return sampler.sample(smiles_list=small_smiles_list, n=self.num_samples)
+
+        if Sampler == bimodal_sampler:
+            print("bimodal_sampler")
+            sampler = Sampler()
+            return sampler.sample(smiles_list=small_smiles_list, n=self.num_samples)
+        
+
+
 
     def _greedy_sample(self, smiles_list, num_samples, time_budget_sec):
         t0 = timer()
