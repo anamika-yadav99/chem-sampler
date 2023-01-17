@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
-
+import pandas as pd
+import csv
 from molecule_generation import load_model_from_directory
 from molecule_generation.utils.cli_utils import (
     get_model_loading_parser,
@@ -8,12 +9,20 @@ from molecule_generation.utils.cli_utils import (
     supress_tensorflow_warnings,
 )
 
-
 def print_samples(model_dir: str, num_samples: int, **model_kwargs) -> None:
     with load_model_from_directory(model_dir, **model_kwargs) as model:
         samples = model.sample(num_samples)
 
     print("\n".join(samples))
+
+def save_samples(model_dir: str, num_samples: int, **model_kwargs) -> None:
+    with load_model_from_directory(model_dir, **model_kwargs) as model:
+        samples = model.sample(num_samples)
+    with open('./samples_generated.csv', 'w') as f:
+        df = pd.DataFrame(samples, columns=['smiles'])
+        df['smiles'].to_csv('./samples_generated.csv', sep='\t', index=False)
+
+
 
 
 def get_argparser() -> argparse.ArgumentParser:
@@ -27,7 +36,7 @@ def get_argparser() -> argparse.ArgumentParser:
 
 def run_from_args(args: argparse.Namespace) -> None:
     model_kwargs = {key: getattr(args, key) for key in ["beam_size", "seed", "num_workers"]}
-    print_samples(
+    save_samples(
         model_dir=args.MODEL_DIR,
         num_samples=args.NUM_SAMPLES,
         **{key: value for (key, value) in model_kwargs.items() if value is not None},

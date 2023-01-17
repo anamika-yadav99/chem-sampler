@@ -1,10 +1,10 @@
 CHECKPOINT_DIR=$1
 SAMPLES=$2
 
-if [ $# -eq  ] ; then
+if [ $# -eq 1 ] ; then
     echo "Filename not supplied."
 else
 
-python molecule_generation.sample.py $CHECKPOINT_DIR $SAMPLES
+python molecule_generation/cli/sample.py $CHECKPOINT_DIR $SAMPLES
 
 fi
