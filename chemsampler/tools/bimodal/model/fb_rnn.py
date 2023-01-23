@@ -40,7 +40,6 @@ class FBRNN():
 
     def build(self, name=None):
         """Build new model or load model by name"""
-
         if (name is None):
             self._lstm = TwoOutLSTM_v2(self._input_dim, self._hidden_units, self._layer)
 

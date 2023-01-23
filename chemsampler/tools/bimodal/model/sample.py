@@ -6,9 +6,7 @@ Implementation of the sampler to generate SMILES from a trained model
 import pandas as pd
 import numpy as np
 import configparser
-from fb_rnn import FBRNN
 from forward_rnn import ForwardRNN
-from nade import NADE
 from one_hot_encoder import SMILESEncoder
 from bimodal import BIMODAL
 import os
@@ -24,8 +22,9 @@ class Sampler():
 
         # Read parameter used during training
         self._config = configparser.ConfigParser()
-        self._config.read('../experiments/' + experiment_name + '.ini')
-        
+        self.root = os.getcwd()
+        self.experiement_dir = os.path.join(self.root, 'experiments/')
+        self._config.read(self.experiement_dir + experiment_name + '.ini')
         self._model_type = self._config['MODEL']['model']
         self._experiment_name = experiment_name
         self._hidden_units = int(self._config['MODEL']['hidden_units'])
@@ -42,11 +41,10 @@ class Sampler():
         self._samples = int(self._config['EVALUATION']['samples'])
         self._T = float(self._config['EVALUATION']['temp'])
         self._starting_token = self._encoder.encode([self._config['EVALUATION']['starting_token']])
+        self.eval_dir= os.path.join(self.root, 'evaluation')
 
-        if self._model_type == 'FBRNN':
-            self._model = FBRNN(self._molecular_size, self._encoding_size,
-                                self._learning_rate, self._hidden_units)
-        elif self._model_type == 'ForwardRNN':
+    
+        if self._model_type == 'ForwardRNN':
             self._model = ForwardRNN(self._molecular_size, self._encoding_size,
                                      self._learning_rate, self._hidden_units)
 
@@ -54,25 +52,23 @@ class Sampler():
             self._model = BIMODAL(self._molecular_size, self._encoding_size,
                                   self._learning_rate, self._hidden_units)
 
-        elif self._model_type == 'NADE':
-            self._generation = self._config['MODEL']['generation']
-            self._missing_token = self._encoder.encode([self._config['TRAINING']['missing_token']])
-            self._model = NADE(self._molecular_size, self._encoding_size, self._learning_rate,
-                               self._hidden_units, self._generation, self._missing_token)
+        
 
         # Read data
-        if os.path.isfile('../data/' + self._file_name + '.csv'):
-            self._data = pd.read_csv('../data/' + self._file_name + '.csv', header=None).values[:, 0]
-        elif os.path.isfile('../data/' + self._file_name + '.tar.xz'):
+        self.data_dir = os.path.join(self.root, 'data/')
+
+        if os.path.isfile(self.data_dir + self._file_name + '.csv'):
+            self._data = pd.read_csv(self.data_dir + self._file_name + '.csv', header=None).values[:, 0]
+        elif os.path.isfile(self.data_dir + self._file_name + '.tar.xz'):
             # Skip first line since empty and last line since nan
-            self._data = pd.read_csv('../data/' + self._file_name + '.tar.xz', compression='xz', header=None).values[
+            self._data = pd.read_csv(self.data_dir + self._file_name + '.tar.xz', compression='xz', header=None).values[
                          1:-1, 0]
 
         # Clean data from start, end and padding token
         for i, mol_dat in enumerate(self._data):
             self._data[i] = clean_molecule(mol_dat, self._model_type)
 
-    def sample(self, N=100, stor_dir='../evaluation', T=0.7, fold=[1], epoch=[9], valid=True, novel=True, unique=True, write_csv=True):
+    def sample(self, N=100,  T=0.7, fold=[1], epoch=[9], valid=True, novel=True, unique=True, write_csv=True):
 
         '''Sample from a model where the number of novel valid unique molecules is fixed
         :param stor_dir:    directory where the generated SMILES are saved
@@ -86,7 +82,8 @@ class Sampler():
         :param write_csv If True, the generated SMILES are written in stor_dir
         :return: res_molecules: list with all the generated SMILES
         '''
-        
+        N = int(N)
+        stor_dir = self.eval_dir
         res_molecules = []
         print('Sampling: started')
         for f in fold:
@@ -95,6 +92,7 @@ class Sampler():
                     stor_dir + '/' + self._experiment_name + '/models/model_fold_' + str(f) + '_epochs_' + str(e))
 
                 new_molecules = []
+                
                 while len(new_molecules) < N:
                     new_mol = self._encoder.decode(self._model.sample(self._starting_token, T))
 

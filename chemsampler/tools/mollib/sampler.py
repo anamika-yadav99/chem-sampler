@@ -58,6 +58,8 @@ class MollibSampler:
         os.remove(self.data_file)
 
     def sample(self, smiles_list, n):
+        print(self.cwd)
+        print(self.exec_folder)
         self._heuristic_parameters(smiles_list, n)
         self._sample(smiles_list)
         molecules = self._read_molecules()

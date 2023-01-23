@@ -50,7 +50,10 @@ class ForwardRNN():
             self._lstm = OneOutLSTM(self._input_dim, self._hidden_units, self._layer)
 
         else:
+            print('======================', self._lstm)
+
             self._lstm = torch.load(name + '.dat', map_location=self._device)
+
 
         if torch.cuda.is_available():
             self._lstm = self._lstm.cuda()

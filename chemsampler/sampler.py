@@ -13,9 +13,8 @@ from .samplers.smallworld.sampler import SmallWorldSampler
 from .samplers.stoned.sampler import StonedSampler
 from .samplers.mollib.sampler import MollibSampler
 from .samplers.fasmifra.sampler import FasmifraSampler
-from .samplers.moler.sampler import moler_sampler
-from .samplers.bimodal.sampler import bimodal_sampler
-
+from .samplers.moler.sampler import MolerSampler
+from .samplers.bimodal.sampler import BimodalSampler
 
 
 SAMPLERS_LIST = [
@@ -24,8 +23,8 @@ SAMPLERS_LIST = [
     SmallWorldSampler,
     StonedSampler,
     MollibSampler,
-    bimodal_sampler,
-    moler_sampler
+    BimodalSampler,
+    MolerSampler
 ]
 
 
@@ -90,12 +89,12 @@ class ChemSampler(object):
             print("FasmifraSampler")
             sampler = Sampler()
             return sampler.sample(smiles_list=small_smiles_list, n=self.num_samples)
-        if Sampler == moler_sampler:
+        if Sampler == MolerSampler:
             print("moler_sampler")
             sampler = Sampler()
             return sampler.sample(smiles_list=small_smiles_list, n=self.num_samples)
 
-        if Sampler == bimodal_sampler:
+        if Sampler == BimodalSampler:
             print("bimodal_sampler")
             sampler = Sampler()
             return sampler.sample(smiles_list=small_smiles_list, n=self.num_samples)

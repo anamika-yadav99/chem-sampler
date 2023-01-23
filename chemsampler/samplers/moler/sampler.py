@@ -1,1 +1,1 @@
-from ...tools.moler.sampler import moler_sample
+from ...tools.moler.sampler import MolerSampler
