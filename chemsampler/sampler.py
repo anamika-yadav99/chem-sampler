@@ -15,6 +15,8 @@ from .samplers.mollib.sampler import MollibSampler
 from .samplers.fasmifra.sampler import FasmifraSampler
 from .samplers.moler.sampler import MolerSampler
 from .samplers.bimodal.sampler import BimodalSampler
+from .samplers.fast_jtnn.sampler import JtnnSampler
+
 
 
 SAMPLERS_LIST = [
@@ -24,7 +26,8 @@ SAMPLERS_LIST = [
     StonedSampler,
     MollibSampler,
     BimodalSampler,
-    MolerSampler
+    MolerSampler,
+    JtnnSampler
 ]
 
 
@@ -96,6 +99,11 @@ class ChemSampler(object):
 
         if Sampler == BimodalSampler:
             print("bimodal_sampler")
+            sampler = Sampler()
+            return sampler.sample(smiles_list=small_smiles_list, n=self.num_samples)
+
+        if Sampler == JtnnSampler:
+            print("jtnn_sampler")
             sampler = Sampler()
             return sampler.sample(smiles_list=small_smiles_list, n=self.num_samples)
         

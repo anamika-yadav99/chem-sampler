@@ -9,7 +9,7 @@ root = os.path.dirname(os.path.abspath(__file__))
 
 MOLER_CONDA_ENVIRONMENT = "fastjtnn"
 
-class MolerSampler:
+class JtnnSampler:
     def __init__(self):
         self.cwd = os.getcwd()
         self.exec_folder = os.path.join(root)
