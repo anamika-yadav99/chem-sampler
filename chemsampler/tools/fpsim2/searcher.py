@@ -48,7 +48,7 @@ class SimilaritySearcher(object):
 
     def search(self, smiles, cutoff=0.7):
         results = self.engine.similarity(smiles, cutoff, n_workers=self.n_workers)
-        results = [(r[0], self.db_smiles[r[0]], r[1]) for r in results]
+        results = [(self.db_smiles[r[0]]) for r in results]
         return results
 
 
