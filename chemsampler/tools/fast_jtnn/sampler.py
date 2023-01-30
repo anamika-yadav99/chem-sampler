@@ -31,7 +31,7 @@ class JtnnSampler:
         return smiles_list
 
     
-    def sample(self, smiles_list, n):
+    def sample(self, n):
         self._sample(n)
         molecules = self._read_molecules()
         return molecules

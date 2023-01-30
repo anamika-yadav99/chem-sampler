@@ -30,7 +30,7 @@ class BimodalSampler:
         return smiles_list
 
 
-    def sample(self, smiles_list, n):
+    def sample(self, n):
         print(self.cwd)
         print(self.exec_folder)
         self._sample( n)
