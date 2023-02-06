@@ -1,4 +1,4 @@
-from ...tools.moler.sampler import MolerSampler
+from ...tools.moler.sampler import _MolerSampler
 from ...tools.fpsim2.searcher import SimilaritySearcher, RandomSearcher
 import os
 
@@ -23,7 +23,7 @@ class MolerSampler:
                 samples += _samples 
         
         else:
-            sampler = MolerSampler()
+            sampler = _MolerSampler()
             samples = sampler.sample(n)
 
         return samples
