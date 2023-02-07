@@ -17,7 +17,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     license="MIT",
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     install_requires=install_requires,
     packages=find_packages(exclude=("utilities")),
     entry_points={"console_scripts": []},
