@@ -3,4 +3,6 @@ tqdm
 exmol
 pandas
 smallworld-api
+fpsim2
+standardiser
 #git+https://github.com/lich-uct/syba.git
